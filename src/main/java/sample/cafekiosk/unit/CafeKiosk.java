@@ -5,11 +5,16 @@ import sample.cafekiosk.unit.beverage.Beverage;
 import sample.cafekiosk.unit.order.Order;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class CafeKiosk {
+
+    public static final LocalTime SHOP_OPEN_TIME = LocalTime.of(10,0);
+    public static final LocalTime SHOP_CLOSE_TIME = LocalTime.of(22,0);
+
 
     private final List<Beverage> beverages = new ArrayList<>();
 
@@ -44,8 +49,24 @@ public class CafeKiosk {
         return  totalPrice;
     }
 
+    // 현재 일시로 인해 테스트하기 어려운 영역  -> 파라미터로 LocalDateTime를 외부에서 받는 걸로 수정
     public  Order createOrder(){
-        return new Order(LocalDateTime.now(), beverages);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalTime currentTime = currentDateTime.toLocalTime();
+        if(currentTime.isBefore(SHOP_OPEN_TIME) || currentTime.isAfter(SHOP_CLOSE_TIME) ){
+            throw new IllegalArgumentException("주문시간이 아닙니다.");
+        }
+
+        return new Order(currentDateTime, beverages);
     }
 
+
+    public  Order createOrder(LocalDateTime currentDateTime){
+        LocalTime currentTime = currentDateTime.toLocalTime();
+        if(currentTime.isBefore(SHOP_OPEN_TIME) || currentTime.isAfter(SHOP_CLOSE_TIME) ){
+            throw new IllegalArgumentException("주문시간이 아닙니다.");
+        }
+
+        return new Order(currentDateTime, beverages);
+    }
 }
