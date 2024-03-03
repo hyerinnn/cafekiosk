@@ -46,6 +46,13 @@ public class CafeKiosk {
         for(Beverage beverage : beverages){
             totalPrice += beverage.getPrice();
         }
+
+/*
+        //Stream 방식
+        beverages.stream()
+                .mapToInt(Beverage::getPrice)       //메소드참조 방식 -> Beverage객체에 대해 getPrice 메소드를 호출하여 해당 객체의 가격을 정수로 반환
+                .sum();
+*/
         return  totalPrice;
     }
 
