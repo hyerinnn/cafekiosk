@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
+import sample.cafekiosk.spring.api.service.request.OrderCreateServiceRequest;
 import sample.cafekiosk.spring.api.service.response.OrderResponse;
 import sample.cafekiosk.spring.domain.order.OrderProductRepository;
 import sample.cafekiosk.spring.domain.order.OrderRepository;
@@ -66,7 +66,7 @@ class OrderServiceTest {
         productRepository.saveAll(List.of(product1, product2, product3));
 
         // 리퀘스트 생성
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "002"))
                 .build();
 
@@ -106,7 +106,7 @@ class OrderServiceTest {
 
 
         // 리퀘스트 생성
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "002", "001", "003"))
                 .build();
 
@@ -158,7 +158,7 @@ class OrderServiceTest {
 
 
         // 리퀘스트 생성
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "002", "001", "003"))
                 .build();
 
@@ -180,7 +180,7 @@ class OrderServiceTest {
         Product product3 = createProduct(HANDMADE, "003", 5000);
         productRepository.saveAll(List.of(product1, product2, product3));
 
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "001"))
                 .build();
 
