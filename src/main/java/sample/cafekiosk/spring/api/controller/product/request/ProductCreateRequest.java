@@ -1,18 +1,28 @@
 package sample.cafekiosk.spring.api.controller.product.request;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import sample.cafekiosk.spring.domain.product.Product;
 import sample.cafekiosk.spring.domain.product.ProductSellingStatus;
 import sample.cafekiosk.spring.domain.product.ProductType;
 
 @Getter
+@NoArgsConstructor
 public class ProductCreateRequest {
 
-
+    @NotNull
     private ProductType type;
+
+    @NotNull
     private ProductSellingStatus sellingStatus;
+
+    @NotNull
     private String name;
+
+    @Positive
     private int price;
 
     @Builder

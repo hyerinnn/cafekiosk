@@ -2,6 +2,7 @@ package sample.cafekiosk.spring.api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sample.cafekiosk.spring.api.controller.product.request.ProductCreateRequest;
 import sample.cafekiosk.spring.api.service.response.ProductResponse;
 import sample.cafekiosk.spring.domain.product.Product;
@@ -11,6 +12,7 @@ import sample.cafekiosk.spring.domain.product.ProductSellingStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -23,6 +25,7 @@ public class ProductService {
      * -> 증가하는 번호를 부여해야 하는경우 : DB의 productNumber필드에 유니크인덱스 제약조건을 걸어서 재시도하도록. 등등
      * -> 상품번호를 UUID로 쓰는 정책을 쓰거나,
      * */
+    @Transactional
     public ProductResponse createProduct(ProductCreateRequest request) {
         String nextProductNumber = createNextProductNumber();
         Product product = request.toEntity(nextProductNumber);
