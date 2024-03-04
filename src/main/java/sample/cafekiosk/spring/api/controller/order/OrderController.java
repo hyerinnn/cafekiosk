@@ -1,8 +1,8 @@
-package sample.cafekiosk.spring.api.controller;
+package sample.cafekiosk.spring.api.controller.order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sample.cafekiosk.spring.api.service.OrderService;
-import sample.cafekiosk.spring.api.service.reqeust.OrderCreateRequest;
+import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
 import sample.cafekiosk.spring.api.service.response.OrderResponse;
 
 import java.time.LocalDateTime;
