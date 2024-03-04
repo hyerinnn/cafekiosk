@@ -14,6 +14,7 @@ import sample.cafekiosk.spring.domain.stock.Stock;
 import sample.cafekiosk.spring.domain.stock.StockRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,10 +48,12 @@ public class OrderService {
                 .collect(Collectors.groupingBy(p -> p, Collectors.counting()));
 
         //4. 재고차감시도
-        for (String stockProductNumber : stockProductNumbers){
+        for (String stockProductNumber : new HashSet<>(stockProductNumbers)){   //stockProductNumbers의 중복제거
             Stock stock = stockMap.get(stockProductNumber);
+            //해당상품 주문 수량
+            //이 부분에서 중복상품에 대한 수량을 확인하므로, for문의 stockProductNumbers에는 중복으로 상품이 들어있으면 중복된 만큼 추가로 차감되는 문제가 생김 -> HashSet으로 중복제거
             int quantity = productCountingMap.get(stockProductNumber).intValue();
-            //재고수량보다 주문상품이 많은 경우
+            //재고수량보다 주문상품이 많은 경우인지 확인
             if(stock.isQuantityLessThen(quantity)){
                 throw new IllegalArgumentException("재고가 부족한 상품이 있습니다.");
             }
