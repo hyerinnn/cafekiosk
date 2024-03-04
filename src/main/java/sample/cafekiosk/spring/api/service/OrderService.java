@@ -3,6 +3,7 @@ package sample.cafekiosk.spring.api.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sample.cafekiosk.spring.api.service.reqeust.OrderCreateRequest;
 import sample.cafekiosk.spring.api.service.response.OrderResponse;
 import sample.cafekiosk.spring.domain.order.Order;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -31,21 +33,26 @@ public class OrderService {
         List<String> productNumbers = request.getProductNumbers();
         List<Product> products = findProductsBy(productNumbers);
 
-        //재고관련 로직
+        //재고관련 로직을 메소드화.
+        deductStockQuantities(products);
+
+        //Order order = new Order() 이런식으로 하지말고, 빌더패턴처럼 Order에 create 메소드에서 생성자를 호출하는 것으로 작업
+        Order order = Order.create(products, registeredDateTime);
+        Order savedOrder = orderRepository.save(order);
+        return OrderResponse.of(savedOrder);
+    }
+
+    //재고관련 로직
+    private void deductStockQuantities(List<Product> products) {
+
         //1. 주문상품 중 재고 차감 체크가 필요한 상품들 filter
-        List<String> stockProductNumbers = products.stream()
-                .filter(product -> ProductType.containsStockType(product.getType()))
-                .map(product -> product.getProductNumber())
-                .collect(Collectors.toList());
+        List<String> stockProductNumbers = extractStockProductNumbers(products);
 
         //2. 위 목록의 각 재고를 조회
-        List<Stock> stocks = stockRepository.findAllByProductNumberIn(stockProductNumbers);
-        //아래 for문때문에 list를 map으로 가공(list를 순회하는 것 보다 map을 순회해서 차감하는게 빠르므로)
-        Map<String, Stock> stockMap = stocks.stream().collect(Collectors.toMap(Stock::getProductNumber, s->s));
+        Map<String, Stock> stockMap = createStockMapBy(stockProductNumbers);
 
         //3. 1번 목록의 상품별 수량 조회(2번에서 중복 상품이 생략되므로)
-        Map<String, Long> productCountingMap = stockProductNumbers.stream()
-                .collect(Collectors.groupingBy(p -> p, Collectors.counting()));
+        Map<String, Long> productCountingMap = createCountingMapby(stockProductNumbers);
 
         //4. 재고차감시도
         for (String stockProductNumber : new HashSet<>(stockProductNumbers)){   //stockProductNumbers의 중복제거
@@ -60,11 +67,6 @@ public class OrderService {
             //재고차감
             stock.deductQuantity(quantity);
         }
-
-        //Order order = new Order() 이런식으로 하지말고, 빌더패턴처럼 Order에 create 메소드에서 생성자를 호출하는 것으로 작업
-        Order order = Order.create(products, registeredDateTime);
-        Order savedOrder = orderRepository.save(order);
-        return OrderResponse.of(savedOrder);
     }
 
     // 중복상품을 위한 로직
@@ -84,4 +86,24 @@ public class OrderService {
                 .collect(Collectors.toList());
         return duplicateProducts;
     }
+
+    private List<String> extractStockProductNumbers(List<Product> products) {
+        return products.stream()
+                .filter(product -> ProductType.containsStockType(product.getType()))
+                .map(product -> product.getProductNumber())
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Long> createCountingMapby(List<String> stockProductNumbers) {
+        return stockProductNumbers.stream()
+                .collect(Collectors.groupingBy(p -> p, Collectors.counting()));
+    }
+
+    private Map<String, Stock> createStockMapBy(List<String> stockProductNumbers) {
+        List<Stock> stocks = stockRepository.findAllByProductNumberIn(stockProductNumbers);
+        //3번의 for문때문에 list를 map으로 가공(list를 순회하는 것 보다 map을 순회해서 차감하는게 빠르므로)
+        Map<String, Stock> stockMap = stocks.stream().collect(Collectors.toMap(Stock::getProductNumber, s->s));
+        return stockMap;
+    }
+
 }
