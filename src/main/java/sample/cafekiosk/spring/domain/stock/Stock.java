@@ -36,7 +36,7 @@ public class Stock extends BaseEntity {
                 .build();
     }
 
-    // 재고가 주문수량보다 적은지 체크
+    // 재고수량보다 주문상품이 많은 경우인지 확인
     public boolean isQuantityLessThen(int quantity) {
         return this.quantity < quantity;
     }

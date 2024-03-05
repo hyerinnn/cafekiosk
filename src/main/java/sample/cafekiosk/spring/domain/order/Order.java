@@ -1,6 +1,5 @@
 package sample.cafekiosk.spring.domain.order;
 
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

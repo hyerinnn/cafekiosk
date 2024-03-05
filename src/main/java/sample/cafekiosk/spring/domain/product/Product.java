@@ -19,7 +19,7 @@ public class Product extends BaseEntity {
 
     private String productNumber;
 
-    @Enumerated(EnumType.STRING) //Enum타입을 스트링으로 해줘서 스트링으로 저장되게끔 셋팅
+    @Enumerated(EnumType.STRING)
     private ProductType type;
 
     @Enumerated(EnumType.STRING)

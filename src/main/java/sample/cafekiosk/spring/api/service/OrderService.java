@@ -3,7 +3,7 @@ package sample.cafekiosk.spring.api.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
+import sample.cafekiosk.spring.api.controller.request.OrderCreateRequest;
 import sample.cafekiosk.spring.api.service.response.OrderResponse;
 import sample.cafekiosk.spring.domain.order.Order;
 import sample.cafekiosk.spring.domain.order.OrderRepository;
@@ -28,19 +28,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final StockRepository stockRepository;
 
-    /**
-     * 재고 감소 -> 동시성에 대한 고민이 필요함
-     * 해결 : optimistic lock / pessimistic lock / ... 등을 통해 순서대로 처리될 수 있게끔 함
-     * */
-
     public OrderResponse createOrder(OrderCreateRequest request, LocalDateTime registeredDateTime) {
         List<String> productNumbers = request.getProductNumbers();
         List<Product> products = findProductsBy(productNumbers);
 
-        //재고관련 로직을 메소드화.
+        //재고관련 로직을 메소드화
         deductStockQuantities(products);
 
-        //Order order = new Order() 이런식으로 하지말고, 빌더패턴처럼 Order에 create 메소드에서 생성자를 호출하는 것으로 작업
         Order order = Order.create(products, registeredDateTime);
         Order savedOrder = orderRepository.save(order);
         return OrderResponse.of(savedOrder);
@@ -56,7 +50,7 @@ public class OrderService {
         Map<String, Stock> stockMap = createStockMapBy(stockProductNumbers);
 
         //3. 1번 목록의 상품별 수량 조회(2번에서 중복 상품이 생략되므로)
-        Map<String, Long> productCountingMap = createCountingMapby(stockProductNumbers);
+        Map<String, Long> productCountingMap = createCountingMapBy(stockProductNumbers);
 
         //4. 재고차감시도
         for (String stockProductNumber : new HashSet<>(stockProductNumbers)){   //stockProductNumbers의 중복제거
@@ -77,15 +71,14 @@ public class OrderService {
     private List<Product> findProductsBy(List<String> productNumbers) {
         //findAllByProductNumberIn 절이 where in절로 조회를 하게 되므로, 중복된 아이템인 경우 중복제거가 되어버려서 수량이 1로 되는 문제발생
         List<Product> products = productRepository.findAllByProductNumberIn(productNumbers);
-        // 그래서 아래코드들 추가.
+        // 그래서 아래코드들 추가
 
-        //1. product의 넘버로 product를 빨리 찾을 수 있는 map 추가
+        //1. product의 넘버로 product를 빨리 찾을 수 있도록 map 추가
         Map<String, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getProductNumber, p -> p));
 
         //2. request로 받은 productNumber들을 순회하면서 productMap에서 product를 찾아서 collecting
         List<Product> duplicateProducts = productNumbers.stream()
-                //.map(productNumber -> productMap.get(productNumber)) // 아래코드로 단순화
                 .map(productMap::get)
                 .collect(Collectors.toList());
         return duplicateProducts;
@@ -98,7 +91,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, Long> createCountingMapby(List<String> stockProductNumbers) {
+    private Map<String, Long> createCountingMapBy(List<String> stockProductNumbers) {
         return stockProductNumbers.stream()
                 .collect(Collectors.groupingBy(p -> p, Collectors.counting()));
     }

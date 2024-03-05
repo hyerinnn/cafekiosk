@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import sample.cafekiosk.spring.api.controller.product.request.ProductCreateRequest;
+import sample.cafekiosk.spring.api.controller.request.ProductCreateRequest;
 import sample.cafekiosk.spring.api.service.response.ProductResponse;
 import sample.cafekiosk.spring.domain.product.Product;
 import sample.cafekiosk.spring.domain.product.ProductRepository;
@@ -37,8 +37,6 @@ class ProductServiceTest {
     void createProduct() {
         // given
         Product product1 = createProduct("001", HANDMADE, SELLING, "아메리카노", 4000);
-        //Product product2 = createProduct("002", HANDMADE, HOLD, "카페라떼", 4000);
-        //Product product3 = createProduct("003", HANDMADE, STOP_SELLING, "팥빙수", 7000);
         productRepository.saveAll(List.of(product1));
 
         ProductCreateRequest request = ProductCreateRequest.builder()
@@ -50,9 +48,20 @@ class ProductServiceTest {
 
         // when
         ProductResponse productResponse = productService.createProduct(request);
+/*
+        //--------------- Mockito, BDD 연습----------------------
+
+        //원하는 행위를 stubbing하기(어떤 행위를 했을때, 어떤 결과를 리턴하도록 지정)
+        Mockito.when(productService.createProduct(any())).thenReturn(any(ProductCreateRequest.class));
+        Mockito.verify(productService, times(1)).createProduct(any(ProductCreateRequest.class));
+
+        //BDD
+        BDDMockito.given(productService.createProduct(any())).willReturn(any(ProductResponse.class));
+
+        //----------------------------------------------------
+*/
 
         // then
-
         // 상품번호가 잘 증가했는지 확인
         assertThat(productResponse).extracting("productNumber", "type", "sellingStatus", "name","price")
                 .contains("002",HANDMADE, SELLING, "카푸치노", 5000);
